@@ -46,6 +46,18 @@
         {
           "name": "_poll_id",
           "type": "u64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "start_date",
+          "type": "u64"
+        },
+        {
+          "name": "end_date",
+          "type": "u64"
         }
       ]
     },

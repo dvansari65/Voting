@@ -52,6 +52,18 @@ export type Votee = {
         {
           "name": "pollId",
           "type": "u64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "startDate",
+          "type": "u64"
+        },
+        {
+          "name": "endDate",
+          "type": "u64"
         }
       ]
     },
