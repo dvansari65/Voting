@@ -122,6 +122,83 @@
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "vote",
+      "discriminator": [
+        227,
+        110,
+        155,
+        23,
+        136,
+        126,
+        172,
+        25
+      ],
+      "accounts": [
+        {
+          "name": "vote",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "poll",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "candidate",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              },
+              {
+                "kind": "arg",
+                "path": "candidate_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_canditate_name",
+          "type": "string"
+        },
+        {
+          "name": "_poll_id",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -150,6 +227,19 @@
         153,
         111
       ]
+    },
+    {
+      "name": "Vote",
+      "discriminator": [
+        96,
+        91,
+        104,
+        57,
+        145,
+        35,
+        172,
+        155
+      ]
     }
   ],
   "types": [
@@ -161,6 +251,10 @@
           {
             "name": "name",
             "type": "string"
+          },
+          {
+            "name": "candidate_votes",
+            "type": "u64"
           }
         ]
       }
@@ -193,6 +287,26 @@
           {
             "name": "canditates_amounts",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Vote",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "candidate_name",
+            "type": "string"
+          },
+          {
+            "name": "poll_id",
+            "type": "u64"
+          },
+          {
+            "name": "voter",
+            "type": "pubkey"
           }
         ]
       }

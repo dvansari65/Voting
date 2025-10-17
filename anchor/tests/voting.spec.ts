@@ -49,7 +49,15 @@ describe('Voting', () => {
       ],
       program.programId
     ) 
-     await program.methods.initialzeCanditate(
+     try {
+       const account = await program.account.candidate.fetch(canditatePda)
+      assert.equal(account.name , "danish","name not matched!")
+      assert.equal(account.candidateVotes.toNumber(),0)
+      console.log("candidate account",account)
+      const pollAccount = await program.account.poll.fetch(pollPda)
+      assert.equal(pollAccount.canditatesAmounts.toNumber(),1,"candidate amount is not 0")
+     } catch (error) {
+      await program.methods.initialzeCanditate(
         candidateName,
         pollId
     )
@@ -63,8 +71,55 @@ describe('Voting', () => {
   
     const account = await program.account.candidate.fetch(canditatePda)
     assert.equal(account.name , "danish","name not matched!")
-
+    assert.equal(account.candidateVotes.toNumber(),0)
+    console.log("candidate account",account)
     const pollAccount = await program.account.poll.fetch(pollPda)
     assert.equal(pollAccount.canditatesAmounts.toNumber(),1,"candidate amount is not 0")
+     }
+  })
+  it("vote initialize",async()=>{
+    const pollId = new BN(0)
+    const [votePda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        pollId.toArrayLike(Buffer,"le",8),
+       provider.wallet.publicKey.toBuffer()
+      ],
+      program.programId
+    ) 
+    const [pollPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        pollId.toArrayLike(Buffer,"le",8),
+      ],
+      program.programId
+    ) 
+    const [candidatePda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        pollId.toArrayLike(Buffer,"le",8),
+        Buffer.from("danish")
+      ],
+      program.programId
+    ) 
+     try {
+      const account = await program.account.vote.fetch(votePda)
+      assert.equal(account.candidateName.toString(),"danish")
+     } catch (error) {
+       await program.methods.vote(
+        "danish",
+        pollId
+      )
+      .accounts({
+        poll:pollPda,
+        candidate:candidatePda,
+        vote:votePda,
+        signer:anchor.getProvider().wallet?.publicKey,
+        systemProgram:anchor.web3.SystemProgram.programId
+      } as any)
+      .rpc()
+      
+      const account = await program.account.vote.fetch(votePda)
+      console.log("account of vote",account)
+      console.log("account.candidateName",account.candidateName)
+      assert.equal(account.candidateName.toString(),"danish")
+     }
   })
 });

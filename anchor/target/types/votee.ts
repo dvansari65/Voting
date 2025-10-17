@@ -128,6 +128,83 @@ export type Votee = {
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "vote",
+      "discriminator": [
+        227,
+        110,
+        155,
+        23,
+        136,
+        126,
+        172,
+        25
+      ],
+      "accounts": [
+        {
+          "name": "vote",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "poll",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              }
+            ]
+          }
+        },
+        {
+          "name": "candidate",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              },
+              {
+                "kind": "arg",
+                "path": "candidateName"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "canditateName",
+          "type": "string"
+        },
+        {
+          "name": "pollId",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -156,6 +233,19 @@ export type Votee = {
         153,
         111
       ]
+    },
+    {
+      "name": "vote",
+      "discriminator": [
+        96,
+        91,
+        104,
+        57,
+        145,
+        35,
+        172,
+        155
+      ]
     }
   ],
   "types": [
@@ -167,6 +257,10 @@ export type Votee = {
           {
             "name": "name",
             "type": "string"
+          },
+          {
+            "name": "candidateVotes",
+            "type": "u64"
           }
         ]
       }
@@ -199,6 +293,26 @@ export type Votee = {
           {
             "name": "canditatesAmounts",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "vote",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "candidateName",
+            "type": "string"
+          },
+          {
+            "name": "pollId",
+            "type": "u64"
+          },
+          {
+            "name": "voter",
+            "type": "pubkey"
           }
         ]
       }
