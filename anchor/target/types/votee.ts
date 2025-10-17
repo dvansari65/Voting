@@ -81,10 +81,26 @@ export type Votee = {
       ],
       "accounts": [
         {
+          "name": "poll",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              }
+            ]
+          }
+        },
+        {
           "name": "candidate",
           "writable": true,
           "pda": {
             "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              },
               {
                 "kind": "arg",
                 "path": "canditateName"
@@ -106,22 +122,26 @@ export type Votee = {
         {
           "name": "canditateName",
           "type": "string"
+        },
+        {
+          "name": "pollId",
+          "type": "u64"
         }
       ]
     }
   ],
   "accounts": [
     {
-      "name": "canditate",
+      "name": "candidate",
       "discriminator": [
-        105,
-        25,
-        156,
-        38,
-        219,
-        94,
-        24,
-        236
+        86,
+        69,
+        250,
+        96,
+        193,
+        10,
+        222,
+        123
       ]
     },
     {
@@ -140,7 +160,7 @@ export type Votee = {
   ],
   "types": [
     {
-      "name": "canditate",
+      "name": "candidate",
       "type": {
         "kind": "struct",
         "fields": [

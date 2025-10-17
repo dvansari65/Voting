@@ -75,10 +75,26 @@
       ],
       "accounts": [
         {
+          "name": "poll",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              }
+            ]
+          }
+        },
+        {
           "name": "candidate",
           "writable": true,
           "pda": {
             "seeds": [
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              },
               {
                 "kind": "arg",
                 "path": "canditate_name"
@@ -100,22 +116,26 @@
         {
           "name": "canditate_name",
           "type": "string"
+        },
+        {
+          "name": "_poll_id",
+          "type": "u64"
         }
       ]
     }
   ],
   "accounts": [
     {
-      "name": "Canditate",
+      "name": "Candidate",
       "discriminator": [
-        105,
-        25,
-        156,
-        38,
-        219,
-        94,
-        24,
-        236
+        86,
+        69,
+        250,
+        96,
+        193,
+        10,
+        222,
+        123
       ]
     },
     {
@@ -134,7 +154,7 @@
   ],
   "types": [
     {
-      "name": "Canditate",
+      "name": "Candidate",
       "type": {
         "kind": "struct",
         "fields": [

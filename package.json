@@ -26,7 +26,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "@coral-xyz/anchor": "^0.31.1",
+    "@coral-xyz/anchor": "^0.32.1",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-label": "^2.1.7",
@@ -37,7 +37,6 @@
     "@solana/wallet-adapter-react-ui": "0.9.39",
     "@solana/web3.js": "^1.98.4",
     "@tanstack/react-query": "^5.89.0",
-    "chai": "^6.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "jotai": "^2.14.0",
@@ -57,16 +56,20 @@
     "@types/chai": "^5.2.2",
     "@types/jest": "^30.0.0",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^24.7.2",
+    "@types/node": "^24.8.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
+    "chai": "^6.2.0",
     "eslint": "^9.35.0",
     "eslint-config-next": "15.5.3",
     "jest": "^30.2.0",
+    "mocha": "^11.7.4",
     "prettier": "^3.6.2",
     "solana-bankrun": "^0.4.0",
     "tailwindcss": "^4.1.13",
     "ts-jest": "^29.4.3",
-    "typescript": "^5.9.2"
+    "ts-mocha": "^11.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

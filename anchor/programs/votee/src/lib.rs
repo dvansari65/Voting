@@ -22,7 +22,14 @@ pub mod votee {
         poll.bump = ctx.bumps.poll;   
         Ok(())
     }
-    pub fn initialze_canditate(ctx: Context<InitializeCanditate>,canditate_name: String) -> Result<()> {
+    pub fn initialze_canditate(ctx: Context<InitializeCanditate>,
+                                canditate_name: String,
+                                _poll_id:u64
+                            ) -> Result<()> {
+        let candiate = &mut ctx.accounts.candidate;
+        candiate.name = canditate_name;
+        let poll = &mut ctx.accounts.poll;
+        poll.canditates_amounts += 1;
         Ok(())
     }
 }
@@ -38,12 +45,19 @@ pub struct InitializePoll<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(canditate_name:String)]
+#[instruction(canditate_name:String,poll_id:u64)]
 pub struct InitializeCanditate<'info> {
-    #[account(init,payer = signer , space = 8 + 8 , seeds = [canditate_name.as_ref()] , bump, )]
-    pub candidate: Account<'info, Canditate>,
+    #[account(
+        mut,
+        seeds= [poll_id.to_le_bytes().as_ref()],
+        bump = poll.bump
+    )]
+    pub poll : Account<'info,Poll>,
+    #[account(init,payer = signer , space = 8 + Candidate::INIT_SPACE , seeds = [poll_id.to_le_bytes().as_ref(),canditate_name.as_bytes()] , bump, )]
+    pub candidate: Account<'info, Candidate>,
     #[account(mut)]
     pub signer: Signer<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -61,7 +75,7 @@ pub struct Poll {
 
 #[account]
 #[derive(InitSpace)]
-pub struct Canditate {
+pub struct Candidate {
     #[max_len(32)]
     pub name: String,
 
