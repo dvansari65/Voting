@@ -117,9 +117,14 @@ describe('Voting', () => {
       .rpc()
       
       const account = await program.account.vote.fetch(votePda)
+      const pollAccount = await program.account.poll.fetch(pollPda)
+      const candidateAccount = await program.account.candidate.fetch(candidatePda)
       console.log("account of vote",account)
       console.log("account.candidateName",account.candidateName)
       assert.equal(account.candidateName.toString(),"danish")
+      assert.equal(pollAccount.canditatesAmounts.toNumber(),1,"candidates amount is different!")
+      console.log("candidate votes",candidateAccount.candidateVotes)
+      assert.equal(candidateAccount.candidateVotes.toNumber(),1)
      }
   })
 });

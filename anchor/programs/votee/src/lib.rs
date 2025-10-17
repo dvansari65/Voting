@@ -48,6 +48,7 @@ pub mod votee {
         vote.voter = ctx.accounts.signer.key();
         vote.candidate_name =  _canditate_name;
         poll.canditates_amounts += 1;
+        candidate.candidate_votes += 1;
         Ok(())
     }
 }
@@ -82,7 +83,7 @@ pub struct InitializeCanditate<'info> {
 #[derive(Accounts)]
 #[instruction(candidate_name:String,poll_id:u64)]
 pub struct InitializeVote<'info> {
-    #[account(init, space = 8 + Vote :: INIT_SPACE ,payer = signer, seeds = [poll_id.to_le_bytes().as_ref(),signer.key().to_bytes().as_ref()],bump)]
+    #[account(init, space = 8 + Vote :: INIT_SPACE ,payer = signer, seeds = [poll_id.to_le_bytes().as_ref(),candidate_name.as_bytes()],bump)]
     pub vote: Account<'info, Vote>,
     #[account(
         seeds = [poll_id.to_le_bytes().as_ref()],
