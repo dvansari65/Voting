@@ -100,7 +100,8 @@ export const initializeVote = ()=>{
     return useMutation({
         mutationFn: async ({candidateName,pollId}:{candidateName:string,pollId:number})=>{
             const votePda = useGetVotePda(pollId,candidateName)
-            return program.methods.initializeVote(
+            return program.methods
+            .initializeVote(
                 pollId,
                 candidateName
             )

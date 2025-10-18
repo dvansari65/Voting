@@ -2,18 +2,18 @@
 
 import { ThemeProvider } from '@/components/theme-provider'
 import { ReactQueryProvider } from './react-query-provider'
-import { ClusterProvider } from '@/components/cluster/cluster-data-access'
-import { SolanaProvider } from '@/components/solana/solana-provider'
+
 import React from 'react'
+import { SolanaProvider } from './solana/solana-providers'
 
 export function AppProviders({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ReactQueryProvider>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <ClusterProvider>
-          <SolanaProvider>{children}</SolanaProvider>
-        </ClusterProvider>
+     <SolanaProvider>
+     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      {children}
       </ThemeProvider>
+     </SolanaProvider>
     </ReactQueryProvider>
   )
 }
