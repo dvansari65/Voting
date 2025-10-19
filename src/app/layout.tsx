@@ -3,6 +3,7 @@ import './globals.css'
 import { AppProviders } from '@/components/app-providers'
 import { AppLayout } from '@/components/app-layout'
 import React from 'react'
+import { Toaster } from '@/components/ui/sonner'
 
 export const metadata: Metadata = {
   title: 'Votee',
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`antialiased`}>
         <AppProviders>
           <AppLayout links={links}>{children}</AppLayout>
+          <Toaster position='bottom-right'/>
         </AppProviders>
       </body>
     </html>

@@ -2,10 +2,11 @@ import { PublicKey } from '@solana/web3.js'
 import { BN } from 'bn.js'
 import { AnchorProvider, Program } from "@coral-xyz/anchor"
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
-import idl from "../../../anchor/target/idl/votee.json"
+import idl from "../../idl/votee.json"
 import {Votee} from "../../../anchor/target/types/votee"
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { votePdaType } from '../types/vote'
+import { toast } from 'sonner'
 
 const PROGRAM_ID = new PublicKey(idl.address)
 export const useVoteProgram = ()=>{
@@ -43,6 +44,7 @@ export const useGetVotePda = (pollId:number,candidateName:string)=>{
 }
 
 export const initializePoll = ()=>{
+    const {program:voteProgram,provider} = useVoteProgram()
     const {program} = useVoteProgram()
     const queryClient = useQueryClient()
     return useMutation({
@@ -55,13 +57,28 @@ export const initializePoll = ()=>{
             }:votePdaType
         )=>{
             try {
+                if(!voteProgram){
+                    toast.error("Program is not Initialized! Please connect your wallet!")
+                    return;
+                }
+                if(!provider.publicKey){
+                    toast.error("Wallet not connected!")
+                    return;
+                }
                 const pollPda = useGetPollPda(pollId)
-                return program.methods
-                .initializePoll(pollId,description,startDate,endDate)
+                const result = await program.methods
+                .initializePoll(
+                    new BN(pollId),
+                    description,
+                    new BN(startDate),
+                    new BN(endDate)
+                )
                 .accounts({
                     poll:pollPda
                 })
                 .rpc()
+                console.log("result",result)
+                return result;
             } catch (error) {
                 console.error("something went wrong!",error)
             }
