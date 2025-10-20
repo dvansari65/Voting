@@ -1,11 +1,12 @@
 import React from 'react'
 import { Calendar, Clock, Hash } from 'lucide-react'
+import { PublicKey } from '@solana/web3.js'
 
 interface pollCardProps {
   pollId: number | null
   description: string
   startDate: number
-  endDate: number
+  endDate: number,
 }
 
 function PollCard({ pollId, description, startDate, endDate }: pollCardProps) {

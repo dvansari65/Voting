@@ -7,7 +7,7 @@ export interface Poll {
     endDate:number
 }
 
-interface pollPdaAccount {
+export interface pollPdaAccount {
     canditatesAmounts:number ,
     startDate:number,
     endDate:number

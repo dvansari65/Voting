@@ -17,6 +17,16 @@ export const useGetPollPda = (pollId:number)=> {
     )
     return pda;
 }
+export const getPollAcount = async(program:any,publicKey:PublicKey)=>{
+    try {
+        const pda = await (program.account as any).poll.fetch(publicKey)
+        console.log("pda",pda)
+        return pda;
+    } catch (error) {
+        console.error("Failed to fetch poll account!",error)
+        return null;
+    }
+}
 
 export const useGetCandidatePda = (candidateName:string,pollId:number)=>{
     const [candidatePda] = PublicKey.findProgramAddressSync(
@@ -71,6 +81,7 @@ export const initializePoll = ()=>{
                 return result;
             } catch (error) {
                 console.error("something went wrong!",error)
+                throw error;
             }
         },
         onSuccess:()=>{

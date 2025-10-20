@@ -6,8 +6,6 @@ import { WalletButton } from '../solana/solana-providers'
 
 interface createPollProps {
   isConnected:boolean,
-  pollId: number | null,
-  setPollId:(value:number | null)=>void,
   description:string,
   setDescription:(value:string)=>void,
   startDate:number,
@@ -20,8 +18,6 @@ interface createPollProps {
 
 function CreatePoll({
   isConnected,
-  pollId,
-  setPollId,
   description,
   setDescription,
   startDate,
@@ -53,8 +49,6 @@ function CreatePoll({
     return (
       <CreatePollCard
       startDate={startDate}
-      pollId={pollId}
-      setPollId={setPollId}
       description={description}
       setDescription={setDescription}
       setStartDate={setStartDate}

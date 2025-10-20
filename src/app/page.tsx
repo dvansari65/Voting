@@ -12,7 +12,6 @@ import { v4 as uuidv4 } from 'uuid';
 type activeTabType = 'create-poll' | 'browse-vote'
 
 export default function Home() {
-  const [pollId,setPollId] = useState<number | null>(null)
   const [description,setDescription] = useState<string>("")
   const [startDate,setStartDate] = useState<number>(0)
   const [endDate,setEndDate] = useState<number>(0)
@@ -22,10 +21,6 @@ export default function Home() {
   const {connected} = useWallet()
   const queryClient = useQueryClient()
   const handleCreatePoll = async()=>{
-    if(!pollId){
-      toast.error("Please provide Poll ID!")
-      return;
-    }
     if(!startDate){
       toast.error("Please provide start date!")
       return;
@@ -54,7 +49,6 @@ export default function Home() {
         queryClient.invalidateQueries({queryKey:["polls"]})
         toast.success("Poll created successfully!")
         setDescription("")
-        setPollId(null)
         setStartDate(0)
         setEndDate(0)
       },
@@ -64,6 +58,7 @@ export default function Home() {
       }
     })
   }
+  
   if(error) return toast.error("Something went wrong!")
 
   return (
@@ -99,8 +94,6 @@ export default function Home() {
               <CreatePoll
                 isCreating={isPending}
                 isConnected={connected}
-                pollId={pollId || null}
-                setPollId={setPollId}
                 description={description}
                 setDescription={setDescription}
                 startDate={Number(startDate)}

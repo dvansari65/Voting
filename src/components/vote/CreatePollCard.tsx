@@ -4,8 +4,6 @@ import { Button } from '../ui/button'
 import { formatDateTimeLocal } from '@/app/utils/FormatDate'
 
 interface CreatePollCardProps {
-  pollId: number | null
-  setPollId: (value: number | null) => void
   description: string
   setDescription: (value: string) => void
   startDate:number
@@ -17,8 +15,6 @@ interface CreatePollCardProps {
 }
 
 function CreatePollCard({
-  pollId,
-  setPollId,
   description,
   setDescription,
   startDate,
@@ -32,22 +28,10 @@ function CreatePollCard({
     e.preventDefault();
     handleCreatePoll();
   }
-
+  const safeStartDate = startDate || Date.now() + 24 * 60 * 60 * 1000; // Default: tomorrow
+  const safeEndDate = endDate || Date.now() + 2 * 24 * 60 * 60 * 1000;
   return (
     <form onSubmit={handleSubmit} className="p-5 flex flex-col  bg-slate-900 rounded-b-2xl">
-      <div className='mb-1'>
-        <label className="block text-white font-semibold mb-2">Poll ID</label>
-        <Input
-          type="number"
-          value={pollId ?? ""}
-          onChange={(e) => {
-            const value = e.target.value;
-            setPollId(value === '' ? null : Number(value));
-          }}
-          className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-purple-300 focus:outline-none focus:border-purple-400"
-          placeholder="Enter unique poll ID (e.g., 1)"
-        />
-      </div>
       <div className='mb-2'>
         <label className="block text-white font-semibold mb-2">Poll Description</label>
         <textarea
@@ -64,7 +48,7 @@ function CreatePollCard({
           <label className="block text-white font-semibold mb-2">Start Date</label>
           <Input
             type="datetime-local"
-            value={formatDateTimeLocal(startDate)}
+            value={formatDateTimeLocal(safeStartDate)}
             onChange={(e) => {
               if(e.target.value){
                 setStartDate(new Date(e.target.value).getTime())
@@ -78,7 +62,7 @@ function CreatePollCard({
           <label className="block text-white font-semibold mb-2">End Date</label>
           <Input
             type="datetime-local"
-            value={new Date(endDate || Date.now()).toISOString().slice(0,16)}
+            value={formatDateTimeLocal(safeEndDate)}
             onChange={(e) => setEndDate(new Date(e.target.value).getTime())}
             className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-purple-400"
           />
