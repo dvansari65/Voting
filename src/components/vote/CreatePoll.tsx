@@ -11,9 +11,9 @@ interface createPollProps {
   description:string,
   setDescription:(value:string)=>void,
   startDate:number,
-  setStartDate:(value:number)=>void,
+  setStartDate:(value:number | number)=>void,
   endDate:number,
-  setEndDate:(value:number)=>void
+  setEndDate:(value:number | number)=>void
   handleCreatePoll:()=>void,
   isCreating:boolean
 }

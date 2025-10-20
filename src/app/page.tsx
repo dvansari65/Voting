@@ -5,10 +5,10 @@ import NumberOfVotes from '@/components/vote/NumberOfVotes'
 import TotalVoters from '@/components/vote/TotalVoters'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useState } from 'react'
-import { initializePoll } from './hooks/blockChain'
+import { initializePoll } from '../hooks/blockChain'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-
+import { v4 as uuidv4 } from 'uuid';
 type activeTabType = 'create-poll' | 'browse-vote'
 
 export default function Home() {
@@ -18,6 +18,7 @@ export default function Home() {
   const [endDate,setEndDate] = useState<number>(0)
   const [activeTab, setActiveTab] = useState<activeTabType>('create-poll')
   const {mutate,isPending,error} = initializePoll()
+  const uuid = uuidv4()
   const {connected} = useWallet()
   const queryClient = useQueryClient()
   const handleCreatePoll = async()=>{
@@ -37,16 +38,25 @@ export default function Home() {
       toast.error("Please connect your wallet first!")
       return;
     }
+    const convertedStartDate = Math.floor(startDate / 1000)
+    const convertedEndDate = Math.floor(endDate / 1000)
+    console.log("start date in milli seconds",startDate)
+    console.log("timestamps",convertedEndDate)
     const payload = {
-      pollId,
+      pollId:Number(uuid),
       description,
-      startDate,
-      endDate
+      startDate:convertedStartDate,
+      endDate:convertedEndDate
     }
     mutate(payload,{
       onSuccess:(data)=>{
         console.log("data from poll account",data)
         queryClient.invalidateQueries({queryKey:["polls"]})
+        toast.success("Poll created successfully!")
+        setDescription("")
+        setPollId(null)
+        setStartDate(0)
+        setEndDate(0)
       },
       onError:(error)=>{
         toast.error(error.message)
@@ -93,7 +103,7 @@ export default function Home() {
                 setPollId={setPollId}
                 description={description}
                 setDescription={setDescription}
-                startDate={startDate}
+                startDate={Number(startDate)}
                 setStartDate={setStartDate}
                 endDate={endDate}
                 setEndDate={setEndDate}

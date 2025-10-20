@@ -12,7 +12,7 @@ export const WalletButton = dynamic(async ()=>(await import("@solana/wallet-adap
 
 export const SolanaProvider =  ({children}:{children:ReactNode})=>{
     const endpoint = useMemo(() => 
-        process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com", 
+        process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "http://127.0.0.1:8899", 
         []
       )
     const onError = useCallback((error: WalletError) => {

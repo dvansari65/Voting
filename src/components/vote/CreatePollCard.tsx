@@ -1,6 +1,7 @@
 import React from 'react'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
+import { formatDateTimeLocal } from '@/app/utils/FormatDate'
 
 interface CreatePollCardProps {
   pollId: number | null
@@ -31,16 +32,6 @@ function CreatePollCard({
     e.preventDefault();
     handleCreatePoll();
   }
-  const formatDateTimeLocal = (timestamp: number) => {
-    const date = new Date(timestamp);
-    // Format: YYYY-MM-DDTHH:mm
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
 
   return (
     <form onSubmit={handleSubmit} className="p-5 flex flex-col  bg-slate-900 rounded-b-2xl">
@@ -61,7 +52,7 @@ function CreatePollCard({
         <label className="block text-white font-semibold mb-2">Poll Description</label>
         <textarea
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => setDescription(e.target.value )}
           className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-purple-300 focus:outline-none focus:border-purple-400 h-24"
           placeholder="What would you like people to vote on?"
           maxLength={280}
