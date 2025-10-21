@@ -65,14 +65,14 @@ function Page() {
     console.log('poll', poll)
   }, [poll])
 
-  const handleCandidateInfoModal = () => {
-    // if(poll?.canditatesAmounts === 0 || poll?.candidateNames.length === 0){
-    //   toast.error("No Candidates Registered yet!");
-    //   return;
-    // }
+  const handleOpenCandidateInfoModal = () => {
+    console.log("poll?.canditatesAmounts",Number(poll?.canditatesAmounts))
+    if (Number(poll?.canditatesAmounts) === 0) {
+      toast.error('No Candidate Registered yet!')
+      return
+    }
     setCandidatesInfoModal(true)
   }
-
   // const handleInitializeCandidate = ()=>[
   //   mutate({
 
@@ -156,7 +156,7 @@ function Page() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Candidates */}
             <button
-              onClick={() => setCandidatesInfoModal(true)}
+              onClick={handleOpenCandidateInfoModal}
               className=" bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl p-6 border border-blue-400/30"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -191,10 +191,14 @@ function Page() {
           </div>
         </div>
       </div>
-      {
-        candidatesInfoModal && <CandidatesInfo className='absolute' onClose={()=>setCandidatesInfoModal(false)} isOpen={candidatesInfoModal} candidateName={poll?.candidateNames}/>
-      }
-      
+      {candidatesInfoModal && (
+        <CandidatesInfo
+          className="absolute left-[25%] top-[40%]"
+          onClose={() => setCandidatesInfoModal(false)}
+          isOpen={candidatesInfoModal}
+          candidateName={poll?.candidateNames}
+        />
+      )}
     </div>
   )
 }
