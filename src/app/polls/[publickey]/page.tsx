@@ -2,12 +2,15 @@
 import { formatDateTime12Hour } from '@/app/utils/formatDateTime12Hrs'
 import { getPollStatus } from '@/app/utils/getStatus'
 import { getTimeInfo } from '@/app/utils/getTimeInfo'
-import CandidatesInfo from '@/components/candidate/candidatesInfo'
+import CandidatesInfo from '@/components/modals/candidatesInfo'
+import InitializeCandidate from '@/components/modals/initializeCandidate'
 import Loader from '@/components/ui/loader'
 import { initializeCandidate } from '@/hooks/blockChain'
 import { useVoteProgram } from '@/hooks/useVoteProgram'
 import { pollPdaAccount } from '@/types/polls'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
+import { useQueryClient } from '@tanstack/react-query'
 import { Calendar, FileText, Hash, Users } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -18,13 +21,15 @@ function Page() {
   const { program } = useVoteProgram()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [candidateName,setCandidateName] = useState("")
   const [poll, setPoll] = useState<pollPdaAccount | null>(null)
-  const [candidateModal, setCandidateModal] = useState(false)
+  const [initializeCandidateModal, setInitializeCandidateModal] = useState(false)
   const [candidatesInfoModal, setCandidatesInfoModal] = useState(false)
   const publickey = params?.publickey as string
-
+  const {connected} = useWallet()
   const pollStatus = poll ? getPollStatus(poll) : null
   const timeInfo = poll ? getTimeInfo(poll) : null
+  const queryClient = useQueryClient()
   const { mutate, isPending, error: candidateError } = initializeCandidate()
   useEffect(() => {
     const getSinglePoll = async () => {
@@ -61,9 +66,7 @@ function Page() {
     getSinglePoll()
   }, [publickey])
 
-  useEffect(() => {
-    console.log('poll', poll)
-  }, [poll])
+
 
   const handleOpenCandidateInfoModal = () => {
     console.log("poll?.canditatesAmounts",Number(poll?.canditatesAmounts))
@@ -73,11 +76,31 @@ function Page() {
     }
     setCandidatesInfoModal(true)
   }
-  // const handleInitializeCandidate = ()=>[
-  //   mutate({
+  const handleInitializeCandidate = ()=>{
+    if(!candidateName){
+      toast.error("Please provide candidate name!")
+      return;
+    }
+    if(!poll?.pollId){
+      toast.error("Please provide poll ID!")
+      return;
+    }
+   if(!connected){
+    toast.error("Connect your wallet first!")
+    return;
+   }
+    const payload ={
+      candidateName,
+      pollId:Number(poll?.pollId),
+      program
+    }
+    mutate(payload,{
+      onSuccess:(data)=>{
+        console.log("data",data)
+      }
+    })
+  }
 
-  //   })
-  // ]
 
   if (loading) {
     return (
@@ -185,7 +208,7 @@ function Page() {
             </div>
           </div>
           <div className="w-full flex justify-center items-center mt-5">
-            <button onClick={() => setCandidateModal(true)} className="px-3 bg-purple-400 rounded-xl py-3">
+            <button onClick={() => setInitializeCandidateModal(true)} className="px-3 bg-purple-400 rounded-xl py-3">
               Register for the Candidate
             </button>
           </div>
@@ -199,6 +222,25 @@ function Page() {
           candidateName={poll?.candidateNames}
         />
       )}
+      {
+        initializeCandidateModal && (
+          <InitializeCandidate
+          isLoading={isPending}
+          candidateName={candidateName}
+          setCandidateName={setCandidateName}
+          initializeCandidate={handleInitializeCandidate}
+          onClose={()=>setInitializeCandidateModal(false)}
+          isOpen={initializeCandidateModal}
+          className='absolute top-[25%] left-[34%]  '
+          />
+        )
+      }
+      {
+        isPending && <div className='absolute top-[30%] left-[45%] '>
+          <Loader />
+        </div>
+      }
+
     </div>
   )
 }

@@ -8,6 +8,68 @@
   },
   "instructions": [
     {
+      "name": "initialize_candidate",
+      "discriminator": [
+        210,
+        107,
+        118,
+        204,
+        255,
+        97,
+        112,
+        26
+      ],
+      "accounts": [
+        {
+          "name": "poll",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "candidate",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              },
+              {
+                "kind": "arg",
+                "path": "canditate_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "canditate_name",
+          "type": "string"
+        },
+        {
+          "name": "_poll_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "initialize_poll",
       "discriminator": [
         193,
@@ -62,68 +124,6 @@
       ]
     },
     {
-      "name": "initialze_canditate",
-      "discriminator": [
-        217,
-        153,
-        110,
-        218,
-        117,
-        187,
-        57,
-        63
-      ],
-      "accounts": [
-        {
-          "name": "poll",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "arg",
-                "path": "poll_id"
-              }
-            ]
-          }
-        },
-        {
-          "name": "candidate",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "arg",
-                "path": "poll_id"
-              },
-              {
-                "kind": "arg",
-                "path": "canditate_name"
-              }
-            ]
-          }
-        },
-        {
-          "name": "signer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "canditate_name",
-          "type": "string"
-        },
-        {
-          "name": "_poll_id",
-          "type": "u64"
-        }
-      ]
-    },
-    {
       "name": "vote",
       "discriminator": [
         227,
@@ -146,8 +146,8 @@
                 "path": "poll_id"
               },
               {
-                "kind": "account",
-                "path": "signer"
+                "kind": "arg",
+                "path": "candidate_name"
               }
             ]
           }
@@ -287,6 +287,12 @@
           {
             "name": "canditates_amounts",
             "type": "u64"
+          },
+          {
+            "name": "candidate_names",
+            "type": {
+              "vec": "string"
+            }
           }
         ]
       }

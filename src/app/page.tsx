@@ -38,7 +38,7 @@ export default function Home() {
     console.log("start date in milli seconds",startDate)
     console.log("timestamps",convertedEndDate)
     const payload = {
-      pollId:Number(uuid),
+      pollId:uuid,
       description,
       startDate:convertedStartDate,
       endDate:convertedEndDate
@@ -60,7 +60,16 @@ export default function Home() {
     })
   }
   
-  if(error) return toast.error("Something went wrong!")
+  if (error) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+        <div className="bg-red-500/20 border border-red-500 rounded-lg p-8 max-w-md">
+          <h2 className="text-red-400 text-xl font-bold mb-2">Error</h2>
+          <p className="text-red-200">{error.message}</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full h-screen multi-layer-bg overflow-y-scroll flex flex-col p-4   ">

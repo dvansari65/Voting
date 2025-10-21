@@ -14,70 +14,16 @@ export type Votee = {
   },
   "instructions": [
     {
-      "name": "initializePoll",
+      "name": "initializeCandidate",
       "discriminator": [
-        193,
-        22,
-        99,
-        197,
-        18,
-        33,
-        115,
-        117
-      ],
-      "accounts": [
-        {
-          "name": "poll",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "arg",
-                "path": "pollId"
-              }
-            ]
-          }
-        },
-        {
-          "name": "signer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "pollId",
-          "type": "u64"
-        },
-        {
-          "name": "description",
-          "type": "string"
-        },
-        {
-          "name": "startDate",
-          "type": "u64"
-        },
-        {
-          "name": "endDate",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "initialzeCanditate",
-      "discriminator": [
-        217,
-        153,
-        110,
-        218,
-        117,
-        187,
-        57,
-        63
+        210,
+        107,
+        118,
+        204,
+        255,
+        97,
+        112,
+        26
       ],
       "accounts": [
         {
@@ -125,6 +71,60 @@ export type Votee = {
         },
         {
           "name": "pollId",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initializePoll",
+      "discriminator": [
+        193,
+        22,
+        99,
+        197,
+        18,
+        33,
+        115,
+        117
+      ],
+      "accounts": [
+        {
+          "name": "poll",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "pollId",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "startDate",
+          "type": "u64"
+        },
+        {
+          "name": "endDate",
           "type": "u64"
         }
       ]
@@ -202,7 +202,7 @@ export type Votee = {
         },
         {
           "name": "pollId",
-          "type": "u64"
+          "type": "string"
         }
       ]
     }
@@ -272,7 +272,7 @@ export type Votee = {
         "fields": [
           {
             "name": "pollId",
-            "type": "u64"
+            "type": "string"
           },
           {
             "name": "bump",
