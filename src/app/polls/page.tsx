@@ -11,7 +11,16 @@ function Polls() {
   useEffect(() => {
     console.log("polls", Polls)
   }, [Polls])
-  
+  if (error) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+        <div className="bg-red-500/20 border border-red-500 rounded-lg p-8 max-w-md">
+          <h2 className="text-red-400 text-xl font-bold mb-2">Error</h2>
+          <p className="text-red-200">{error.message}</p>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className=' w-full h-screen overflow-y-scroll multi-layer-bg p-4'>
       <div className='relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>

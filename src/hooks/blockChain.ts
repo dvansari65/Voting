@@ -96,7 +96,7 @@ export const initializeCandidate = ()=>{
     return useMutation({
         mutationFn: async ({candidateName,pollId}:{candidateName:string,pollId:number})=>{
             const candidatePda = useGetCandidatePda(candidateName,pollId)
-            return program.methods
+            const data = program.methods
             .initializeCandidate(
                 candidateName,pollId
             )
@@ -104,6 +104,8 @@ export const initializeCandidate = ()=>{
                 candidate:candidatePda
             })
             .rpc()
+            console.log("data from the candidate:",data)
+            return data;
         },
         onSuccess:()=>{
             queryclient.invalidateQueries({queryKey:["candidates"]})

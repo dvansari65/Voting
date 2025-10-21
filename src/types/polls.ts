@@ -1,3 +1,4 @@
+import { candidateInfo } from "./candidate";
 
 
 export interface Poll {
@@ -12,7 +13,8 @@ export interface pollPdaAccount {
     startDate:number,
     endDate:number
     description:string,
-    pollId:number
+    pollId:number,
+    candidateNames:candidateInfo[]
 }
 
 export interface getAllPollsResponse {

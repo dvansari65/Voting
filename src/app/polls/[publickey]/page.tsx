@@ -1,13 +1,13 @@
 'use client'
-import { formatDateTimeLocal } from '@/app/utils/FormatDate'
+import { formatDateTime12Hour } from '@/app/utils/formatDateTime12Hrs'
 import { getPollStatus } from '@/app/utils/getStatus'
 import { getTimeInfo } from '@/app/utils/getTimeInfo'
+import CandidatesInfo from '@/components/candidate/candidatesInfo'
 import Loader from '@/components/ui/loader'
-import { getPollAcount } from '@/hooks/blockChain'
+import { initializeCandidate } from '@/hooks/blockChain'
 import { useVoteProgram } from '@/hooks/useVoteProgram'
-import { Poll, pollPdaAccount } from '@/types/polls'
+import { pollPdaAccount } from '@/types/polls'
 import { PublicKey } from '@solana/web3.js'
-import { useQuery } from '@tanstack/react-query'
 import { Calendar, FileText, Hash, Users } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -19,10 +19,13 @@ function Page() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [poll, setPoll] = useState<pollPdaAccount | null>(null)
+  const [candidateModal, setCandidateModal] = useState(false)
+  const [candidatesInfoModal, setCandidatesInfoModal] = useState(false)
   const publickey = params?.publickey as string
 
   const pollStatus = poll ? getPollStatus(poll) : null
   const timeInfo = poll ? getTimeInfo(poll) : null
+  const { mutate, isPending, error: candidateError } = initializeCandidate()
   useEffect(() => {
     const getSinglePoll = async () => {
       setLoading(true)
@@ -58,6 +61,24 @@ function Page() {
     getSinglePoll()
   }, [publickey])
 
+  useEffect(() => {
+    console.log('poll', poll)
+  }, [poll])
+
+  const handleCandidateInfoModal = () => {
+    // if(poll?.canditatesAmounts === 0 || poll?.candidateNames.length === 0){
+    //   toast.error("No Candidates Registered yet!");
+    //   return;
+    // }
+    setCandidatesInfoModal(true)
+  }
+
+  // const handleInitializeCandidate = ()=>[
+  //   mutate({
+
+  //   })
+  // ]
+
   if (loading) {
     return (
       <div className="w-full h-screen flex justify-center items-center">
@@ -75,6 +96,16 @@ function Page() {
       </div>
     )
   }
+  if (candidateError) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+        <div className="bg-red-500/20 border border-red-500 rounded-lg p-8 max-w-md">
+          <h2 className="text-red-400 text-xl font-bold mb-2">Error</h2>
+          <p className="text-red-200">{candidateError.message}</p>
+        </div>
+      </div>
+    )
+  }
   if (!poll) {
     return (
       <div className="w-full h-screen flex justify-center items-center">
@@ -83,7 +114,7 @@ function Page() {
     )
   }
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 md:p-8">
+    <div className=" relative min-h-screen w-full multi-layer-bg p-4 md:p-8">
       <div className="max-w-4xl mx-auto h-full flex flex-col justify-center">
         {/* Header */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 mb-6 border border-white/20 shadow-2xl">
@@ -116,19 +147,24 @@ function Page() {
               <FileText className="w-6 h-6 text-purple-400" />
               <h2 className="text-xl font-semibold text-white">Description</h2>
             </div>
-            <p className="text-gray-200 text-lg leading-relaxed bg-black/20 rounded-lg p-4">{poll?.description.toString()}</p>
+            <p className="text-gray-200 text-lg leading-relaxed bg-black/20 rounded-lg p-4">
+              {poll?.description.toString()}
+            </p>
           </div>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Candidates */}
-            <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl p-6 border border-blue-400/30">
+            <button
+              onClick={() => setCandidatesInfoModal(true)}
+              className=" bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl p-6 border border-blue-400/30"
+            >
               <div className="flex items-center gap-3 mb-2">
                 <Users className="w-6 h-6 text-blue-400" />
                 <p className="text-blue-200 text-sm font-medium">Candidates</p>
               </div>
-              <p className="text-white text-3xl font-bold">{Number(poll?.canditatesAmounts)}</p>
-            </div>
+              <p className="text-white text-3xl font-bold text-start">{Number(poll?.canditatesAmounts)}</p>
+            </button>
 
             {/* Start Date */}
             <div className="bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl p-6 border border-green-400/30">
@@ -136,7 +172,7 @@ function Page() {
                 <Calendar className="w-6 h-6 text-green-400" />
                 <p className="text-green-200 text-sm font-medium">Start Date</p>
               </div>
-              <p className="text-white text-sm font-semibold">{formatDateTimeLocal(Number(poll?.startDate))}</p>
+              <p className="text-white text-sm font-semibold">{formatDateTime12Hour(Number(poll?.startDate))}</p>
             </div>
 
             {/* End Date */}
@@ -145,11 +181,20 @@ function Page() {
                 <Calendar className="w-6 h-6 text-orange-400" />
                 <p className="text-orange-200 text-sm font-medium">End Date</p>
               </div>
-              <p className="text-white text-sm font-semibold">{formatDateTimeLocal(Number(poll?.endDate))}</p>
+              <p className="text-white text-sm font-semibold">{formatDateTime12Hour(Number(poll?.endDate))}</p>
             </div>
+          </div>
+          <div className="w-full flex justify-center items-center mt-5">
+            <button onClick={() => setCandidateModal(true)} className="px-3 bg-purple-400 rounded-xl py-3">
+              Register for the Candidate
+            </button>
           </div>
         </div>
       </div>
+      {
+        candidatesInfoModal && <CandidatesInfo className='absolute' onClose={()=>setCandidatesInfoModal(false)} isOpen={candidatesInfoModal} candidateName={poll?.candidateNames}/>
+      }
+      
     </div>
   )
 }

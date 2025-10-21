@@ -43,6 +43,7 @@ export default function Home() {
       startDate:convertedStartDate,
       endDate:convertedEndDate
     }
+    console.log("payload",payload)
     mutate(payload,{
       onSuccess:(data)=>{
         console.log("data from poll account",data)

@@ -28,9 +28,11 @@ pub mod votee {
         _poll_id: u64,
     ) -> Result<()> {
         let candidate = &mut ctx.accounts.candidate;
-        candidate.name = canditate_name;
+        candidate.name = canditate_name.clone();
         let poll = &mut ctx.accounts.poll;
         poll.canditates_amounts += 1;
+        let poll = &mut ctx.accounts.poll;
+        poll.candidate_names.push(canditate_name);
         candidate.candidate_votes = 0;
         Ok(())
     }
@@ -51,6 +53,7 @@ pub mod votee {
         candidate.candidate_votes += 1;
         Ok(())
     }
+
 }
 
 #[derive(Accounts)]
@@ -76,7 +79,6 @@ pub struct InitializeCanditate<'info> {
     pub candidate: Account<'info, Candidate>,
     #[account(mut)]
     pub signer: Signer<'info>,
-
     pub system_program: Program<'info, System>,
 }
 
@@ -103,6 +105,7 @@ pub struct InitializeVote<'info> {
     pub system_program: Program<'info, System>,
 }
 
+
 #[account]
 #[derive(InitSpace)]
 pub struct Poll {
@@ -113,6 +116,8 @@ pub struct Poll {
     pub start_date: u64,
     pub end_date: u64,
     pub canditates_amounts: u64,
+    #[max_len(10,32)]
+    pub candidate_names:Vec<String>
 }
 
 #[account]

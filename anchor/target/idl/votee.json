@@ -146,8 +146,8 @@
                 "path": "poll_id"
               },
               {
-                "kind": "account",
-                "path": "signer"
+                "kind": "arg",
+                "path": "candidate_name"
               }
             ]
           }
@@ -287,6 +287,12 @@
           {
             "name": "canditates_amounts",
             "type": "u64"
+          },
+          {
+            "name": "candidate_names",
+            "type": {
+              "vec": "string"
+            }
           }
         ]
       }

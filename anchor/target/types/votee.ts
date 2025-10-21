@@ -152,8 +152,8 @@ export type Votee = {
                 "path": "pollId"
               },
               {
-                "kind": "account",
-                "path": "signer"
+                "kind": "arg",
+                "path": "candidateName"
               }
             ]
           }
@@ -293,6 +293,12 @@ export type Votee = {
           {
             "name": "canditatesAmounts",
             "type": "u64"
+          },
+          {
+            "name": "candidateNames",
+            "type": {
+              "vec": "string"
+            }
           }
         ]
       }
