@@ -71,7 +71,7 @@ function PollCard({ pollId, description, startDate, endDate }: pollCardProps) {
         {/* Description */}
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Description</p>
-          <p className="text-gray-200 leading-relaxed">
+          <p className="text-green-400 leading-relaxed">
             {description}
           </p>
         </div>
