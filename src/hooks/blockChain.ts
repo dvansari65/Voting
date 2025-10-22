@@ -32,7 +32,7 @@ export const useGetCandidatePda = (candidateName: string, pollId: string) => {
 
 export const useGetVotePda = (pollId: string, candidateName: string) => {
   const [votePda] = PublicKey.findProgramAddressSync(
-    [Buffer.from(pollId), Buffer.from(candidateName)],
+    [Buffer.from("vote"),Buffer.from(pollId), Buffer.from(candidateName)],
     PROGRAM_ID,
   )
   return votePda
@@ -125,10 +125,28 @@ export const initializeVote = () => {
   return useMutation({
     mutationFn: async ({ candidateName, pollId }: { candidateName: string; pollId: string }) => {
       const votePda = useGetVotePda(pollId, candidateName)
+      const candidatePda = useGetCandidatePda(candidateName,pollId)
+      const pollPda = useGetPollPda(pollId)
+      if(!candidatePda){
+        throw new Error("Candidate PDA is missing!")
+      }
+      if(!pollPda){
+        throw new Error("Poll PDA is missing!")
+      }
+      if(!votePda){
+        throw new Error("Vote PDA is missing!")
+      }
+      if(!program.provider.publicKey){
+        throw new Error("Please connect your wallet first!")
+      }
       return program.methods
         .initializeVote(pollId, candidateName)
         .accounts({
           vote: votePda,
+          poll:pollPda,
+          candidate:candidatePda,
+          signer:program.provider.publicKey,
+          systemProgram:SystemProgram.programId
         })
         .rpc()
     },
