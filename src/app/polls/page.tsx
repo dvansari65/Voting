@@ -2,15 +2,12 @@
 import { getAllPolls } from '@/api/getAllPolls'
 import PollCard from '@/components/Polls/PollCard'
 import Loader from '@/components/ui/loader'
-import { getAllPollsResponse, Poll } from '@/types/polls'
+import { getAllPollsResponse } from '@/types/polls'
 import Link from 'next/link'
-import React, { useEffect } from 'react'
+import React from 'react'
 
 function Polls() {
   const {data: Polls, isPending, error} = getAllPolls()
-  useEffect(() => {
-    console.log("polls", Polls)
-  }, [Polls])
   if (error) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">

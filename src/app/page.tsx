@@ -1,8 +1,5 @@
 'use client'
-import ActivePolls from '@/components/vote/ActivePolls'
 import CreatePoll from '@/components/vote/CreatePoll'
-import NumberOfVotes from '@/components/vote/NumberOfVotes'
-import TotalVoters from '@/components/vote/TotalVoters'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useState } from 'react'
 import { initializePoll } from '../hooks/blockChain'
@@ -19,7 +16,7 @@ export default function Home() {
   const [endDate, setEndDate] = useState<number>(0)
   const [errorModal, setErrorModal] = useState(false)
   const [activeTab, setActiveTab] = useState<activeTabType>('create-poll')
-  const { mutate, isPending, error, isError } = initializePoll()
+  const { mutate, isPending, error } = initializePoll()
   const {data:allPollsData} = getAllPolls()
   const uuid = uuidv4()
   const { connected } = useWallet()
@@ -47,7 +44,7 @@ export default function Home() {
       startDate: convertedStartDate,
       endDate: convertedEndDate,
     }
-    console.log('payload', payload)
+
     mutate(payload, {
       onSuccess: (data) => {
         console.log('data from poll account', data)
@@ -104,7 +101,6 @@ export default function Home() {
             )}
           </div>
         </div>
-
         {/* New Content Section Below the Card */}
         <div className="mt-12 max-w-4xl mx-auto space-y-8 pb-12">
           {/* Why Choose Section */}
@@ -144,7 +140,6 @@ export default function Home() {
               </p>
             </div>
           </div>
-
           {/* Stats Section */}
           <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 backdrop-blur-sm border border-white/20 rounded-xl p-8 mt-8">
             <div className="grid md:grid-cols-3 gap-8 text-center">
@@ -164,7 +159,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
           {/* How It Works */}
           <div className="mt-12 space-y-6">
             <h2 className="text-2xl font-bold text-white text-center mb-8">

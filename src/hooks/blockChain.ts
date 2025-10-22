@@ -1,14 +1,14 @@
 import { PublicKey, SystemProgram } from '@solana/web3.js'
 import { BN } from 'bn.js'
 import idl from '../idl/votee.json'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useVoteProgram } from '../hooks/useVoteProgram'
 
-const PROGRAM_ID = new PublicKey(idl.address)
+export const PROGRAM_ID = new PublicKey(idl.address)
 
 export const useGetPollPda = (pollId: string) => {
-  const [pda] = PublicKey.findProgramAddressSync([Buffer.from("poll_v2"),Buffer.from(pollId)], PROGRAM_ID)
+  const [pda] = PublicKey.findProgramAddressSync([Buffer.from('poll_v2'), Buffer.from(pollId)], PROGRAM_ID)
   return pda
 }
 export const getPollAcount = async (program: any, publicKey: PublicKey) => {
@@ -23,16 +23,17 @@ export const getPollAcount = async (program: any, publicKey: PublicKey) => {
 }
 
 export const useGetCandidatePda = (candidateName: string, pollId: string) => {
+  const { program } = useVoteProgram()
   const [candidatePda] = PublicKey.findProgramAddressSync(
-    [Buffer.from("poll_v2"),Buffer.from(pollId), Buffer.from(candidateName)],
-    PROGRAM_ID,
+    [Buffer.from('poll_v2'), Buffer.from(pollId), Buffer.from(candidateName)],
+    program.programId,
   )
   return candidatePda
 }
 
 export const useGetVotePda = (pollId: string, candidateName: string) => {
   const [votePda] = PublicKey.findProgramAddressSync(
-    [Buffer.from("vote"),Buffer.from(pollId), Buffer.from(candidateName)],
+    [Buffer.from('vote'), Buffer.from(pollId), Buffer.from(candidateName)],
     PROGRAM_ID,
   )
   return votePda
@@ -94,7 +95,7 @@ export const initializeCandidate = () => {
       const pollPda = useGetPollPda(pollId)
 
       const data = await program.methods
-        .initializeCandidate(candidateName,pollId)
+        .initializeCandidate(candidateName, pollId)
         .accounts({
           candidate: candidatePda,
           poll: pollPda,
@@ -125,28 +126,28 @@ export const initializeVote = () => {
   return useMutation({
     mutationFn: async ({ candidateName, pollId }: { candidateName: string; pollId: string }) => {
       const votePda = useGetVotePda(pollId, candidateName)
-      const candidatePda = useGetCandidatePda(candidateName,pollId)
+      const candidatePda = useGetCandidatePda(candidateName, pollId)
       const pollPda = useGetPollPda(pollId)
-      if(!candidatePda){
-        throw new Error("Candidate PDA is missing!")
+      if (!candidatePda) {
+        throw new Error('Candidate PDA is missing!')
       }
-      if(!pollPda){
-        throw new Error("Poll PDA is missing!")
+      if (!pollPda) {
+        throw new Error('Poll PDA is missing!')
       }
-      if(!votePda){
-        throw new Error("Vote PDA is missing!")
+      if (!votePda) {
+        throw new Error('Vote PDA is missing!')
       }
-      if(!program.provider.publicKey){
-        throw new Error("Please connect your wallet first!")
+      if (!program.provider.publicKey) {
+        throw new Error('Please connect your wallet first!')
       }
       return program.methods
         .initializeVote(pollId, candidateName)
         .accounts({
           vote: votePda,
-          poll:pollPda,
-          candidate:candidatePda,
-          signer:program.provider.publicKey,
-          systemProgram:SystemProgram.programId
+          poll: pollPda,
+          candidate: candidatePda,
+          signer: program.provider.publicKey,
+          systemProgram: SystemProgram.programId,
         })
         .rpc()
     },

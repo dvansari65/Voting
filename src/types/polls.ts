@@ -14,7 +14,7 @@ export interface pollPdaAccount {
     endDate:number
     description:string,
     pollId:number,
-    candidateNames:candidateInfo[]
+    candidateNames:string[]
 }
 
 export interface getAllPollsResponse {

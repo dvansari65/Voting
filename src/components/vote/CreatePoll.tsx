@@ -29,7 +29,7 @@ function CreatePoll({
 }:createPollProps) {
   if(!isConnected){
     return (
-      <div className='flex flex-col justify-center items-center p-5 bg-slate-900 gap-4 rounded-b-2xl'>
+      <div className='flex flex-col justify-center items-center p-5 bg-transparent gap-4 rounded-b-2xl text-black'>
         <div className=''>
           <Vote size={50}className='text-green-500'/>
         </div>

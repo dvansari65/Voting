@@ -2,13 +2,15 @@
 import { formatDateTime12Hour } from '@/app/utils/formatDateTime12Hrs'
 import { getPollStatus } from '@/app/utils/getStatus'
 import { getTimeInfo } from '@/app/utils/getTimeInfo'
+import Candidates from '@/components/candidates'
 import CandidatesInfo from '@/components/modals/candidatesInfo'
 import InitializeCandidate from '@/components/modals/initializeCandidate'
+import VoteModal from '@/components/modals/vote'
 import Loader from '@/components/ui/loader'
-import { initializeCandidate } from '@/hooks/blockChain'
+import { initializeCandidate, PROGRAM_ID, useGetCandidatePda, useGetPollPda, useGetVotePda } from '@/hooks/blockChain'
 import { useSinglePoll } from '@/hooks/useSinglePoll'
 import { useVoteProgram } from '@/hooks/useVoteProgram'
-import { pollPdaAccount } from '@/types/polls'
+import { candidateInfo } from '@/types/candidate'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
@@ -20,57 +22,134 @@ import { toast } from 'sonner'
 function Page() {
   const params = useParams()
   const { program } = useVoteProgram()
-  const [candidateName,setCandidateName] = useState("")
+  const [candidateName, setCandidateName] = useState('')
   const [initializeCandidateModal, setInitializeCandidateModal] = useState(false)
   const [candidatesInfoModal, setCandidatesInfoModal] = useState(false)
+  const [voteModal, setVoteModal] = useState<boolean>(false)
+  const [candidateData, setCandidateData] = useState<candidateInfo | undefined>(undefined)
+  const [selectedCandidateName, setSelectedCandidateName] = useState<string>('')
   const publickey = params?.publickey as string
-  const {connected} = useWallet()
+  const { connected, publicKey: walletPublicKey } = useWallet()
   const queryClient = useQueryClient()
+
   const { mutate, isPending, error: candidateError } = initializeCandidate()
   const convertedPublicKey = new PublicKey(publickey)
-  const {data,isPending:isLoading,error:pollError} = useSinglePoll(convertedPublicKey)
-  useEffect(()=>{
-    console.log("single poll",data);
-    
-  },[data])
+  const { data, isPending: isLoading, error: pollError } = useSinglePoll(convertedPublicKey)
+
+  useEffect(() => {
+    console.log('single poll', data)
+  }, [data])
   const pollStatus = data ? getPollStatus(data) : null
   const timeInfo = data ? getTimeInfo(data) : null
 
   const handleOpenCandidateInfoModal = () => {
-    console.log("poll?.canditatesAmounts",Number(data?.canditatesAmounts))
+    console.log('poll?.canditatesAmounts', Number(data?.canditatesAmounts))
     if (Number(data?.canditatesAmounts) === 0) {
       toast.error('No Candidate Registered yet!')
       return
     }
     setCandidatesInfoModal(true)
   }
-  const handleInitializeCandidate = ()=>{
-    if(!candidateName){
-      toast.error("Please provide candidate name!")
-      return;
+  const handleInitializeCandidate = () => {
+    if (!candidateName) {
+      toast.error('Please provide candidate name!')
+      return
     }
-    if(!data?.pollId){
-      toast.error("Please provide poll ID!")
-      return;
+    if (!data?.pollId) {
+      toast.error('Please provide poll ID!')
+      return
     }
-   if(!connected){
-    toast.error("Connect your wallet first!")
-    return;
-   }
-    const payload ={
+    if (!connected) {
+      toast.error('Connect your wallet first!')
+      return
+    }
+    const payload = {
       candidateName,
-      pollId:data?.pollId.toString(),
-      program
+      pollId: data?.pollId.toString(),
+      program,
     }
-    mutate(payload,{
-      onSuccess:(data)=>{
+    mutate(payload, {
+      onSuccess: (data) => {
         setInitializeCandidateModal(false)
-        queryClient.invalidateQueries({queryKey:["poll"]})
-        console.log("data",data)
-      }
+        queryClient.invalidateQueries({ queryKey: ['poll'] })
+        console.log('data', data)
+      },
     })
   }
 
+  const handleGetCandidateAccount = async ({ pollId, candidateName }: { pollId: string; candidateName: string }) => {
+    try {
+      const [candidatePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('poll_v2', 'utf-8'), Buffer.from(pollId), Buffer.from(candidateName)],
+        program.programId,
+      )
+      const info = await program.provider.connection.getAccountInfo(candidatePda)
+      console.log('Account info:', info)
+      console.log('candidate pda', candidatePda)
+      if (!candidatePda) {
+        toast.error('Candidate pda not obtained!')
+        return
+      }
+      const candidateAccountData = await (program.account as any).candidate.fetch(candidatePda)
+      if (!candidateAccountData) {
+        console.warn('Discriminator mismatch — this account is not Candidate type')
+        return null
+      }
+      console.log('candidate data', candidateAccountData)
+      setCandidateData(candidateAccountData)
+      setSelectedCandidateName(candidateName)
+      setVoteModal(true)
+    } catch (error: any) {
+      toast.error(error.message)
+      throw error
+    }
+  }
+
+  const handleVote = async () => {
+    if (!connected || !walletPublicKey) {
+      toast.error('Connect your wallet first!')
+      return
+    }
+    if (!data?.pollId || !selectedCandidateName) {
+      toast.error('Invalid poll or candidate!')
+      return
+    }
+
+    try {
+      const pollId = data.pollId.toString()
+
+      // Derive PDAs
+      const votePda = useGetVotePda(pollId,selectedCandidateName)
+      const candidatePda = useGetCandidatePda(selectedCandidateName,pollId)
+      const pollPda = useGetPollPda(pollId)
+      // Check if user already voted for this candidate
+      const existingVote = await program.provider.connection.getAccountInfo(votePda)
+      if (existingVote) {
+        toast.error('You have already voted for this candidate!')
+        return
+      }
+      // Call the vote instruction
+      const tx = await program.methods
+        .vote(selectedCandidateName, pollId)
+        .accounts({
+          vote: votePda,
+          poll: pollPda,
+          candidate: candidatePda,
+          signer: walletPublicKey,
+        })
+        .rpc()
+      console.log('Vote transaction:', tx)
+      toast.success('Vote submitted successfully!')
+      // Refresh candidate data
+      await handleGetCandidateAccount({ pollId, candidateName: selectedCandidateName })
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['AllPolls'] })
+      
+    } catch (error: any) {
+      console.error('Vote error:', error)
+      toast.error(error.message || 'Failed to submit vote')
+    }
+  }
 
   if (isLoading) {
     return (
@@ -106,6 +185,7 @@ function Page() {
       </div>
     )
   }
+  const pollId = String(data?.pollId)
   return (
     <div className=" relative min-h-screen w-full multi-layer-bg p-4 md:p-8">
       <div className="max-w-4xl mx-auto h-full flex flex-col justify-center">
@@ -114,7 +194,7 @@ function Page() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <Hash className="w-8 h-8 text-purple-400" />
-              <h1 className="text-3xl md:text-4xl font-bold text-white">Poll ID: {(data?.pollId)}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-white">Poll ID: {data?.pollId}</h1>
             </div>
             {pollStatus && (
               <span className={`${pollStatus?.color} text-white px-4 py-2 rounded-full text-sm font-semibold`}>
@@ -132,6 +212,18 @@ function Page() {
           )}
         </div>
 
+        <div className="border border-gray-500 py-2">
+          <span className='px-1 py-2 font-bold '>Candidates:</span>
+          {data?.candidateNames?.map((name, index) => (
+            <div key={`${name}-${index}`}>
+              <Candidates 
+                candidateName={name} 
+                pollId={pollId}
+                onClick={handleGetCandidateAccount} 
+              />
+            </div>
+          ))}
+        </div>
         {/* Main Content */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/20 shadow-2xl flex-1">
           {/* Description */}
@@ -192,25 +284,36 @@ function Page() {
           candidateNames={data?.candidateNames}
         />
       )}
-      {
-        initializeCandidateModal && (
-          <InitializeCandidate
+      {initializeCandidateModal && (
+        <InitializeCandidate
           isLoading={isPending}
           candidateName={candidateName}
           setCandidateName={setCandidateName}
           initializeCandidate={handleInitializeCandidate}
-          onClose={()=>setInitializeCandidateModal(false)}
+          onClose={() => setInitializeCandidateModal(false)}
           isOpen={initializeCandidateModal}
-          className='absolute top-[25%] left-[34%]  '
-          />
-        )
-      }
-      {
-        isPending && <div className='absolute top-[30%] left-[45%] '>
+          className="fixed top-[25%] left-[34%]  "
+        />
+      )}
+      {isPending && (
+        <div className="absolute top-[30%] left-[45%] ">
           <Loader />
         </div>
-      }
-
+      )}
+      {voteModal && candidateData && (
+        <VoteModal 
+          candidateName={candidateData.name}
+          totalVotes={Number(candidateData?.candidateVotes)} 
+          onClose={() => {
+            setVoteModal(false)
+            setCandidateData(undefined)
+            setSelectedCandidateName('')
+          }} 
+          onVote={handleVote}
+          isOpen={voteModal} 
+          className="fixed" 
+        />
+      )}
     </div>
   )
 }
