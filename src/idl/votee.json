@@ -26,6 +26,18 @@
           "pda": {
             "seeds": [
               {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
                 "kind": "arg",
                 "path": "poll_id"
               }
@@ -37,6 +49,18 @@
           "writable": true,
           "pda": {
             "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
               {
                 "kind": "arg",
                 "path": "poll_id"
@@ -65,7 +89,7 @@
         },
         {
           "name": "_poll_id",
-          "type": "u64"
+          "type": "string"
         }
       ]
     },
@@ -88,6 +112,18 @@
           "pda": {
             "seeds": [
               {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
                 "kind": "arg",
                 "path": "poll_id"
               }
@@ -107,7 +143,7 @@
       "args": [
         {
           "name": "_poll_id",
-          "type": "u64"
+          "type": "string"
         },
         {
           "name": "description",
@@ -142,6 +178,18 @@
           "pda": {
             "seeds": [
               {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
                 "kind": "arg",
                 "path": "poll_id"
               },
@@ -157,6 +205,18 @@
           "pda": {
             "seeds": [
               {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
                 "kind": "arg",
                 "path": "poll_id"
               }
@@ -168,6 +228,18 @@
           "writable": true,
           "pda": {
             "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
               {
                 "kind": "arg",
                 "path": "poll_id"
@@ -191,12 +263,12 @@
       ],
       "args": [
         {
-          "name": "_canditate_name",
+          "name": "canditate_name",
           "type": "string"
         },
         {
-          "name": "_poll_id",
-          "type": "u64"
+          "name": "poll_id",
+          "type": "string"
         }
       ]
     }
@@ -266,7 +338,7 @@
         "fields": [
           {
             "name": "poll_id",
-            "type": "u64"
+            "type": "string"
           },
           {
             "name": "bump",
@@ -308,7 +380,7 @@
           },
           {
             "name": "poll_id",
-            "type": "u64"
+            "type": "string"
           },
           {
             "name": "voter",
