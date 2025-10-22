@@ -25,7 +25,7 @@ pub mod votee {
     pub fn initialize_candidate(
         ctx: Context<InitializeCanditate>,
         canditate_name: String,
-        _poll_id: u64,
+        _poll_id: String,
     ) -> Result<()> {
         let candidate = &mut ctx.accounts.candidate;
         candidate.name = canditate_name.clone();
@@ -49,7 +49,6 @@ pub mod votee {
         poll.poll_id = poll_id;
         vote.voter = ctx.accounts.signer.key();
         vote.candidate_name =  canditate_name;
-        poll.canditates_amounts += 1;
         candidate.candidate_votes += 1;
         Ok(())
     }
@@ -59,7 +58,7 @@ pub mod votee {
 #[derive(Accounts)]
 #[instruction(poll_id: String)]
 pub struct InitializePoll<'info> {
-    #[account( init , payer = signer , space = 8 + Poll::INIT_SPACE  , seeds = [ poll_id.as_bytes()],bump  )]
+    #[account( init , payer = signer , space = 8 + Poll::INIT_SPACE  , seeds = [b"poll_v2", poll_id.as_bytes()],bump  )]
     pub poll: Account<'info, Poll>,
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -71,11 +70,11 @@ pub struct InitializePoll<'info> {
 pub struct InitializeCanditate<'info> {
     #[account(
         mut,
-        seeds= [poll_id.as_bytes()],
+        seeds= [b"poll_v2",poll_id.as_bytes()],
         bump = poll.bump
     )]
     pub poll: Account<'info, Poll>,
-    #[account(init,payer = signer , space = 8 + Candidate::INIT_SPACE , seeds = [poll_id.as_bytes(),canditate_name.as_bytes()] , bump, )]
+    #[account(init,payer = signer , space = 8 + Candidate::INIT_SPACE , seeds = [b"poll_v2",poll_id.as_bytes(),canditate_name.as_bytes()] , bump, )]
     pub candidate: Account<'info, Candidate>,
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -85,16 +84,16 @@ pub struct InitializeCanditate<'info> {
 #[derive(Accounts)]
 #[instruction(candidate_name:String,poll_id:String)]
 pub struct InitializeVote<'info> {
-    #[account(init, space = 8 + Vote :: INIT_SPACE ,payer = signer, seeds = [poll_id.as_bytes(),candidate_name.as_bytes()],bump)]
+    #[account(init, space = 8 + Vote :: INIT_SPACE ,payer = signer, seeds = [b"poll_v2",poll_id.as_bytes(),candidate_name.as_bytes()],bump)]
     pub vote: Account<'info, Vote>,
     #[account(
-        seeds = [poll_id.as_bytes()],
+        seeds = [b"poll_v2",poll_id.as_bytes()],
         bump = poll.bump
     )]
     pub poll: Account<'info, Poll>,
     #[account(
         mut,
-        seeds = [poll_id.as_bytes(),candidate_name.as_bytes()],
+        seeds = [b"poll_v2",poll_id.as_bytes(),candidate_name.as_bytes()],
         bump
     )]
     pub candidate: Account<'info, Candidate>,
@@ -134,6 +133,7 @@ pub struct Candidate {
 pub struct Vote {
     #[max_len(32)]
     pub candidate_name: String,
-    pub poll_id: u64,
+     #[max_len(32)]
+    pub poll_id: String,
     pub voter:Pubkey
 }

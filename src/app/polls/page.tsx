@@ -23,12 +23,12 @@ function Polls() {
   }
   return (
     <div className=' w-full h-screen overflow-y-scroll multi-layer-bg p-4'>
-      <div className='relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+      <div className='relative flex flex-col  gap-10 px-5'>
         {
           Polls?.map(({account, publicKey}: getAllPollsResponse) => (
             <Link href={`/polls/${publicKey.toString()}`}   key={publicKey.toString()} className='h-full'>
               <PollCard
-                pollId={Number(account?.pollId)}
+                pollId={(account?.pollId)}
                 description={account.description}
                 startDate={Number(account.startDate)}
                 endDate={Number(account.endDate)}

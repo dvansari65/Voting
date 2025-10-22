@@ -8,71 +8,62 @@ import { useState } from 'react'
 import { initializePoll } from '../hooks/blockChain'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
+import Error from '@/components/modals/Error'
 type activeTabType = 'create-poll' | 'browse-vote'
 
 export default function Home() {
-  const [description,setDescription] = useState<string>("")
-  const [startDate,setStartDate] = useState<number>(0)
-  const [endDate,setEndDate] = useState<number>(0)
+  const [description, setDescription] = useState<string>('')
+  const [startDate, setStartDate] = useState<number>(0)
+  const [endDate, setEndDate] = useState<number>(0)
+  const [errorModal, setErrorModal] = useState(false)
   const [activeTab, setActiveTab] = useState<activeTabType>('create-poll')
-  const {mutate,isPending,error} = initializePoll()
+  const { mutate, isPending, error, isError } = initializePoll()
   const uuid = uuidv4()
-  const {connected} = useWallet()
+  const { connected } = useWallet()
   const queryClient = useQueryClient()
-  const handleCreatePoll = async()=>{
-    if(!startDate){
-      toast.error("Please provide start date!")
-      return;
+  const handleCreatePoll = async () => {
+    if (!startDate) {
+      toast.error('Please provide start date!')
+      return
     }
-    if(!endDate){
-      toast.error("Please provide end date!")
-      return;
+    if (!endDate) {
+      toast.error('Please provide end date!')
+      return
     }
-    if(!connected){
-      toast.error("Please connect your wallet first!")
-      return;
+    if (!connected) {
+      toast.error('Please connect your wallet first!')
+      return
     }
     const convertedStartDate = Math.floor(startDate / 1000)
     const convertedEndDate = Math.floor(endDate / 1000)
-    console.log("start date in milli seconds",startDate)
-    console.log("timestamps",convertedEndDate)
+  
+    const safePollId = uuid.slice(0, 32)
     const payload = {
-      pollId:uuid,
+      pollId: safePollId,
       description,
-      startDate:convertedStartDate,
-      endDate:convertedEndDate
+      startDate: convertedStartDate,
+      endDate: convertedEndDate,
     }
-    console.log("payload",payload)
-    mutate(payload,{
-      onSuccess:(data)=>{
-        console.log("data from poll account",data)
-        queryClient.invalidateQueries({queryKey:["polls"]})
-        toast.success("Poll created successfully!")
-        setDescription("")
+    console.log('payload', payload)
+    mutate(payload, {
+      onSuccess: (data) => {
+        console.log('data from poll account', data)
+        queryClient.invalidateQueries({ queryKey: ['polls'] })
+        toast.success('Poll created successfully!')
+        setDescription('')
         setStartDate(0)
         setEndDate(0)
       },
-      onError:(error)=>{
+      onError: (error) => {
         toast.error(error.message)
-        return;
-      }
+        return
+      },
     })
-  }
-  
-  if (error) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
-        <div className="bg-red-500/20 border border-red-500 rounded-lg p-8 max-w-md">
-          <h2 className="text-red-400 text-xl font-bold mb-2">Error</h2>
-          <p className="text-red-200">{error.message}</p>
-        </div>
-      </div>
-    )
   }
 
   return (
-    <div className="w-full h-screen multi-layer-bg overflow-y-scroll flex flex-col p-4   ">
+    <div className="relative w-full h-screen multi-layer-bg overflow-y-scroll flex flex-col p-4   ">
       <div className=" h-[40vh] p-2 flex justify-center items-center gap-10 ">
         <ActivePolls />
         <TotalVoters />
@@ -84,23 +75,24 @@ export default function Home() {
             <button
               onClick={() => setActiveTab('create-poll')}
               className={`rounded-t-2xl rounded-r-[0px] text-2xl hover:bg-gray-700 px-20 py-2  ${
-                activeTab === "create-poll" ? 
-                'bg-gray-700 border-b-[5px] border-blue-500' : 'bg-slate-900 border-b-[5px] border-gray-500 '
-                 }`}
+                activeTab === 'create-poll'
+                  ? 'bg-gray-700 border-b-[5px] border-blue-500'
+                  : 'bg-slate-900 border-b-[5px] border-gray-500 '
+              }`}
             >
               Create Poll
             </button>
             <button
               onClick={() => setActiveTab('browse-vote')}
               className={`rounded-t-2xl rounded-l-[0px] text-2xl px-20 py-2 hover:bg-gray-700 bg-slate-900 ${
-                 activeTab === "browse-vote" ? 
-                'bg-gray-700 border-b-[5px] border-blue-500' : 'bg-slate-900 border-b-[5px] border-gray-500 '
-                }`}
+                activeTab === 'browse-vote'
+                  ? 'bg-gray-700 border-b-[5px] border-blue-500'
+                  : 'bg-slate-900 border-b-[5px] border-gray-500 '
+              }`}
             >
               Browse Vote
             </button>
-            {
-              activeTab == "create-poll" && 
+            {activeTab == 'create-poll' && (
               <CreatePoll
                 isCreating={isPending}
                 isConnected={connected}
@@ -112,10 +104,17 @@ export default function Home() {
                 setEndDate={setEndDate}
                 handleCreatePoll={handleCreatePoll}
               />
-            }
+            )}
           </div>
         </div>
-        <div></div>
+        {true && (
+          <Error
+            onClose={() => setErrorModal(false)}
+            isOpen={errorModal}
+            className="absolute"
+            errorMessage={error?.message}
+          />
+        )}
       </div>
     </div>
   )

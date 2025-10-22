@@ -6,6 +6,7 @@ import CandidatesInfo from '@/components/modals/candidatesInfo'
 import InitializeCandidate from '@/components/modals/initializeCandidate'
 import Loader from '@/components/ui/loader'
 import { initializeCandidate } from '@/hooks/blockChain'
+import { useSinglePoll } from '@/hooks/useSinglePoll'
 import { useVoteProgram } from '@/hooks/useVoteProgram'
 import { pollPdaAccount } from '@/types/polls'
 import { useWallet } from '@solana/wallet-adapter-react'
@@ -19,58 +20,25 @@ import { toast } from 'sonner'
 function Page() {
   const params = useParams()
   const { program } = useVoteProgram()
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
   const [candidateName,setCandidateName] = useState("")
-  const [poll, setPoll] = useState<pollPdaAccount | null>(null)
   const [initializeCandidateModal, setInitializeCandidateModal] = useState(false)
   const [candidatesInfoModal, setCandidatesInfoModal] = useState(false)
   const publickey = params?.publickey as string
   const {connected} = useWallet()
-  const pollStatus = poll ? getPollStatus(poll) : null
-  const timeInfo = poll ? getTimeInfo(poll) : null
   const queryClient = useQueryClient()
   const { mutate, isPending, error: candidateError } = initializeCandidate()
-  useEffect(() => {
-    const getSinglePoll = async () => {
-      setLoading(true)
-      console.log('public key', publickey)
-      if (!publickey) {
-        setLoading(false)
-        setError('Please provide publicKey')
-        return
-      }
-      if (!program) {
-        setLoading(false)
-        setError('Program is not provided!')
-        return
-      }
-      try {
-        const convertedPublicKey = new PublicKey(publickey)
-        const data = await (program?.account as any).poll.fetch(convertedPublicKey)
-        console.log('poll data', data)
-        if (!data) {
-          setError('Data not found!')
-          return
-        }
-        setPoll(data)
-      } catch (error: any) {
-        console.error('Failed to get poll!', error)
-        setLoading(false)
-        setError(error.message || 'Failed to get poll!')
-        return null
-      } finally {
-        setLoading(false)
-      }
-    }
-    getSinglePoll()
-  }, [publickey])
-
-
+  const convertedPublicKey = new PublicKey(publickey)
+  const {data,isPending:isLoading,error:pollError} = useSinglePoll(convertedPublicKey)
+  useEffect(()=>{
+    console.log("single poll",data);
+    
+  },[data])
+  const pollStatus = data ? getPollStatus(data) : null
+  const timeInfo = data ? getTimeInfo(data) : null
 
   const handleOpenCandidateInfoModal = () => {
-    console.log("poll?.canditatesAmounts",Number(poll?.canditatesAmounts))
-    if (Number(poll?.canditatesAmounts) === 0) {
+    console.log("poll?.canditatesAmounts",Number(data?.canditatesAmounts))
+    if (Number(data?.canditatesAmounts) === 0) {
       toast.error('No Candidate Registered yet!')
       return
     }
@@ -81,7 +49,7 @@ function Page() {
       toast.error("Please provide candidate name!")
       return;
     }
-    if(!poll?.pollId){
+    if(!data?.pollId){
       toast.error("Please provide poll ID!")
       return;
     }
@@ -91,30 +59,32 @@ function Page() {
    }
     const payload ={
       candidateName,
-      pollId:Number(poll?.pollId),
+      pollId:data?.pollId.toString(),
       program
     }
     mutate(payload,{
       onSuccess:(data)=>{
+        setInitializeCandidateModal(false)
+        queryClient.invalidateQueries({queryKey:["poll"]})
         console.log("data",data)
       }
     })
   }
 
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="w-full h-screen flex justify-center items-center">
         <Loader />
       </div>
     )
   }
-  if (error) {
+  if (pollError) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
         <div className="bg-red-500/20 border border-red-500 rounded-lg p-8 max-w-md">
           <h2 className="text-red-400 text-xl font-bold mb-2">Error</h2>
-          <p className="text-red-200">{error}</p>
+          <p className="text-red-200">{pollError.message}</p>
         </div>
       </div>
     )
@@ -129,7 +99,7 @@ function Page() {
       </div>
     )
   }
-  if (!poll) {
+  if (!data) {
     return (
       <div className="w-full h-screen flex justify-center items-center">
         <p className="text-white">No poll data available</p>
@@ -144,7 +114,7 @@ function Page() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <Hash className="w-8 h-8 text-purple-400" />
-              <h1 className="text-3xl md:text-4xl font-bold text-white">Poll #{Number(poll?.pollId)}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-white">Poll ID: {(data?.pollId)}</h1>
             </div>
             {pollStatus && (
               <span className={`${pollStatus?.color} text-white px-4 py-2 rounded-full text-sm font-semibold`}>
@@ -171,7 +141,7 @@ function Page() {
               <h2 className="text-xl font-semibold text-white">Description</h2>
             </div>
             <p className="text-gray-200 text-lg leading-relaxed bg-black/20 rounded-lg p-4">
-              {poll?.description.toString()}
+              {data?.description.toString()}
             </p>
           </div>
 
@@ -186,7 +156,7 @@ function Page() {
                 <Users className="w-6 h-6 text-blue-400" />
                 <p className="text-blue-200 text-sm font-medium">Candidates</p>
               </div>
-              <p className="text-white text-3xl font-bold text-start">{Number(poll?.canditatesAmounts)}</p>
+              <p className="text-white text-3xl font-bold text-start">{Number(data?.canditatesAmounts)}</p>
             </button>
 
             {/* Start Date */}
@@ -195,7 +165,7 @@ function Page() {
                 <Calendar className="w-6 h-6 text-green-400" />
                 <p className="text-green-200 text-sm font-medium">Start Date</p>
               </div>
-              <p className="text-white text-sm font-semibold">{formatDateTime12Hour(Number(poll?.startDate))}</p>
+              <p className="text-white text-sm font-semibold">{formatDateTime12Hour(Number(data?.startDate))}</p>
             </div>
 
             {/* End Date */}
@@ -204,7 +174,7 @@ function Page() {
                 <Calendar className="w-6 h-6 text-orange-400" />
                 <p className="text-orange-200 text-sm font-medium">End Date</p>
               </div>
-              <p className="text-white text-sm font-semibold">{formatDateTime12Hour(Number(poll?.endDate))}</p>
+              <p className="text-white text-sm font-semibold">{formatDateTime12Hour(Number(data?.endDate))}</p>
             </div>
           </div>
           <div className="w-full flex justify-center items-center mt-5">
@@ -219,7 +189,7 @@ function Page() {
           className="absolute left-[25%] top-[40%]"
           onClose={() => setCandidatesInfoModal(false)}
           isOpen={candidatesInfoModal}
-          candidateName={poll?.candidateNames}
+          candidateNames={data?.candidateNames}
         />
       )}
       {

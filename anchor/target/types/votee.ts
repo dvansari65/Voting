@@ -32,6 +32,18 @@ export type Votee = {
           "pda": {
             "seeds": [
               {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
                 "kind": "arg",
                 "path": "pollId"
               }
@@ -43,6 +55,18 @@ export type Votee = {
           "writable": true,
           "pda": {
             "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
               {
                 "kind": "arg",
                 "path": "pollId"
@@ -71,7 +95,7 @@ export type Votee = {
         },
         {
           "name": "pollId",
-          "type": "u64"
+          "type": "string"
         }
       ]
     },
@@ -93,6 +117,18 @@ export type Votee = {
           "writable": true,
           "pda": {
             "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
               {
                 "kind": "arg",
                 "path": "pollId"
@@ -148,6 +184,18 @@ export type Votee = {
           "pda": {
             "seeds": [
               {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
                 "kind": "arg",
                 "path": "pollId"
               },
@@ -163,6 +211,18 @@ export type Votee = {
           "pda": {
             "seeds": [
               {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
                 "kind": "arg",
                 "path": "pollId"
               }
@@ -174,6 +234,18 @@ export type Votee = {
           "writable": true,
           "pda": {
             "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108,
+                  95,
+                  118,
+                  50
+                ]
+              },
               {
                 "kind": "arg",
                 "path": "pollId"
@@ -314,7 +386,7 @@ export type Votee = {
           },
           {
             "name": "pollId",
-            "type": "u64"
+            "type": "string"
           },
           {
             "name": "voter",
