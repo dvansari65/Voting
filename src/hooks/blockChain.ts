@@ -2,14 +2,13 @@ import { PublicKey, SystemProgram } from '@solana/web3.js'
 import { BN } from 'bn.js'
 import idl from '../idl/votee.json'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { votePdaType } from '../types/vote'
 import { toast } from 'sonner'
 import { useVoteProgram } from '../hooks/useVoteProgram'
 
 const PROGRAM_ID = new PublicKey(idl.address)
 
-export const useGetPollPda = (pollId: number) => {
-  const [pda] = PublicKey.findProgramAddressSync([Buffer.from(new BN(pollId).toArray('le', 8))], PROGRAM_ID)
+export const useGetPollPda = (pollId: string) => {
+  const [pda] = PublicKey.findProgramAddressSync([Buffer.from("poll_v2"),Buffer.from(pollId)], PROGRAM_ID)
   return pda
 }
 export const getPollAcount = async (program: any, publicKey: PublicKey) => {
@@ -23,17 +22,17 @@ export const getPollAcount = async (program: any, publicKey: PublicKey) => {
   }
 }
 
-export const useGetCandidatePda = (candidateName: string, pollId: number) => {
+export const useGetCandidatePda = (candidateName: string, pollId: string) => {
   const [candidatePda] = PublicKey.findProgramAddressSync(
-    [new BN(pollId).toArrayLike(Buffer, 'le', 8), Buffer.from(candidateName)],
+    [Buffer.from("poll_v2"),Buffer.from(pollId), Buffer.from(candidateName)],
     PROGRAM_ID,
   )
   return candidatePda
 }
 
-export const useGetVotePda = (pollId: number, candidateName: string) => {
+export const useGetVotePda = (pollId: string, candidateName: string) => {
   const [votePda] = PublicKey.findProgramAddressSync(
-    [Buffer.from(new BN(pollId).toArray('le', 8)), Buffer.from(candidateName)],
+    [Buffer.from(pollId), Buffer.from(candidateName)],
     PROGRAM_ID,
   )
   return votePda
@@ -58,15 +57,12 @@ export const initializePoll = () => {
         if (!voteProgram) {
           throw new Error('Program is not Initialized! Please connect your wallet!')
         }
-        if (!provider.publicKey) {
-          throw new Error('Wallet not connected!')
-        }
         if (!voteProgram.provider.publicKey) {
           throw new Error('Wallet not connected!')
         }
         const pollPda = useGetPollPda(pollId)
         const result = await voteProgram.methods
-          .initializePoll(new BN(pollId), description, new BN(startDate), new BN(endDate))
+          .initializePoll(pollId, description, new BN(startDate), new BN(endDate))
           .accounts({
             poll: pollPda,
             signer: voteProgram.provider.publicKey,
@@ -90,7 +86,7 @@ export const initializeCandidate = () => {
   const queryClient = useQueryClient()
   const { program } = useVoteProgram()
   return useMutation({
-    mutationFn: async ({ candidateName, pollId }: { candidateName: string; pollId: number }) => {
+    mutationFn: async ({ candidateName, pollId }: { candidateName: string; pollId: string }) => {
       if (!program.provider.publicKey) {
         throw new Error('Connect your wallet first!')
       }
@@ -98,7 +94,7 @@ export const initializeCandidate = () => {
       const pollPda = useGetPollPda(pollId)
 
       const data = await program.methods
-        .initializeCandidate(candidateName, new BN(pollId))
+        .initializeCandidate(candidateName,pollId)
         .accounts({
           candidate: candidatePda,
           poll: pollPda,
@@ -127,7 +123,7 @@ export const initializeVote = () => {
   const { program } = useVoteProgram()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ candidateName, pollId }: { candidateName: string; pollId: number }) => {
+    mutationFn: async ({ candidateName, pollId }: { candidateName: string; pollId: string }) => {
       const votePda = useGetVotePda(pollId, candidateName)
       return program.methods
         .initializeVote(pollId, candidateName)
