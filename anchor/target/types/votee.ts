@@ -330,6 +330,10 @@ export type Votee = {
           {
             "name": "candidateVotes",
             "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }

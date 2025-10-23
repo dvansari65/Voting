@@ -87,12 +87,20 @@ export const initializeCandidate = () => {
   const queryClient = useQueryClient()
   const { program } = useVoteProgram()
   return useMutation({
-    mutationFn: async ({ candidateName, pollId }: { candidateName: string; pollId: string }) => {
+    mutationFn: async ({ 
+      candidateName, 
+      pollId,
+      candidatePda,
+      pollPda
+     }: { 
+      candidateName: string; 
+      pollId: string,
+      candidatePda:PublicKey,
+      pollPda:PublicKey
+      }) => {
       if (!program.provider.publicKey) {
         throw new Error('Connect your wallet first!')
       }
-      const candidatePda = useGetCandidatePda(candidateName, pollId)
-      const pollPda = useGetPollPda(pollId)
 
       const data = await program.methods
         .initializeCandidate(candidateName, pollId)

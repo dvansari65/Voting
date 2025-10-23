@@ -7,7 +7,7 @@ import CandidatesInfo from '@/components/modals/candidatesInfo'
 import InitializeCandidate from '@/components/modals/initializeCandidate'
 import VoteModal from '@/components/modals/vote'
 import Loader from '@/components/ui/loader'
-import { initializeCandidate, PROGRAM_ID, useGetCandidatePda, useGetPollPda, useGetVotePda } from '@/hooks/blockChain'
+import { initializeCandidate, PROGRAM_ID} from '@/hooks/blockChain'
 import { useSinglePoll } from '@/hooks/useSinglePoll'
 import { useVoteProgram } from '@/hooks/useVoteProgram'
 import { candidateInfo } from '@/types/candidate'
@@ -63,17 +63,34 @@ function Page() {
       toast.error('Connect your wallet first!')
       return
     }
+    const [votePda] = PublicKey.findProgramAddressSync(
+      [Buffer.from('vote'), Buffer.from(pollId), Buffer.from(candidateName)],
+      PROGRAM_ID,
+    )
+    const [candidatePda] = PublicKey.findProgramAddressSync(
+      [Buffer.from('poll_v2'), Buffer.from(pollId), Buffer.from(candidateName)],
+      program.programId,
+    )
+    const [pollPda] = PublicKey.findProgramAddressSync([Buffer.from('poll_v2'), Buffer.from(pollId)], PROGRAM_ID)
     const payload = {
       candidateName,
       pollId: data?.pollId.toString(),
       program,
+      pollPda,
+      votePda,
+      candidatePda
     }
+
     mutate(payload, {
       onSuccess: (data) => {
         setInitializeCandidateModal(false)
         queryClient.invalidateQueries({ queryKey: ['poll'] })
         console.log('data', data)
       },
+      onError:(error)=>{
+      toast.error(error.message)
+      return;
+      }
     })
   }
 
@@ -117,11 +134,17 @@ function Page() {
 
     try {
       const pollId = data.pollId.toString()
-
+      console.log('porgram id', program.programId.toString())
       // Derive PDAs
-      const votePda = useGetVotePda(pollId,selectedCandidateName)
-      const candidatePda = useGetCandidatePda(selectedCandidateName,pollId)
-      const pollPda = useGetPollPda(pollId)
+      const [votePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('vote'), Buffer.from(pollId), Buffer.from(candidateName)],
+        PROGRAM_ID,
+      )
+      const [candidatePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('poll_v2'), Buffer.from(pollId), Buffer.from(candidateName)],
+        program.programId,
+      )
+      const [pollPda] = PublicKey.findProgramAddressSync([Buffer.from('poll_v2'), Buffer.from(pollId)], PROGRAM_ID)
       // Check if user already voted for this candidate
       const existingVote = await program.provider.connection.getAccountInfo(votePda)
       if (existingVote) {
@@ -144,7 +167,6 @@ function Page() {
       await handleGetCandidateAccount({ pollId, candidateName: selectedCandidateName })
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['AllPolls'] })
-      
     } catch (error: any) {
       console.error('Vote error:', error)
       toast.error(error.message || 'Failed to submit vote')
@@ -213,14 +235,10 @@ function Page() {
         </div>
 
         <div className="border border-gray-500 py-2">
-          <span className='px-1 py-2 font-bold '>Candidates:</span>
+          <span className="px-1 py-2 font-bold ">Candidates:</span>
           {data?.candidateNames?.map((name, index) => (
             <div key={`${name}-${index}`}>
-              <Candidates 
-                candidateName={name} 
-                pollId={pollId}
-                onClick={handleGetCandidateAccount} 
-              />
+              <Candidates candidateName={name} pollId={pollId} onClick={handleGetCandidateAccount} />
             </div>
           ))}
         </div>
@@ -301,17 +319,17 @@ function Page() {
         </div>
       )}
       {voteModal && candidateData && (
-        <VoteModal 
+        <VoteModal
           candidateName={candidateData.name}
-          totalVotes={Number(candidateData?.candidateVotes)} 
+          totalVotes={Number(candidateData?.candidateVotes)}
           onClose={() => {
             setVoteModal(false)
             setCandidateData(undefined)
             setSelectedCandidateName('')
-          }} 
+          }}
           onVote={handleVote}
-          isOpen={voteModal} 
-          className="fixed" 
+          isOpen={voteModal}
+          className="fixed"
         />
       )}
     </div>

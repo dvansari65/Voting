@@ -324,6 +324,10 @@
           {
             "name": "candidate_votes",
             "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }

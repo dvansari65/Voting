@@ -33,6 +33,7 @@ pub mod votee {
         poll.canditates_amounts += 1;
         let poll = &mut ctx.accounts.poll;
         poll.candidate_names.push(canditate_name);
+        candidate.bump = ctx.bumps.candidate;
         candidate.candidate_votes = 0;
         Ok(())
     }
@@ -44,8 +45,6 @@ pub mod votee {
         let candidate = &mut ctx.accounts.candidate;
         let poll = &mut ctx.accounts.poll;
         let vote = &mut ctx.accounts.vote;
-        let cloned_candidate_name = canditate_name.clone();
-        candidate.name = cloned_candidate_name;
         poll.poll_id = poll_id;
         vote.voter = ctx.accounts.signer.key();
         vote.candidate_name =  canditate_name;
@@ -74,7 +73,7 @@ pub struct InitializeCanditate<'info> {
         bump = poll.bump
     )]
     pub poll: Account<'info, Poll>,
-    #[account(init,payer = signer , space = 8 + Candidate::INIT_SPACE , seeds = [b"poll_v2",poll_id.as_bytes(),canditate_name.as_bytes()] , bump, )]
+    #[account(init,payer = signer , space = 8 + Candidate::INIT_SPACE , seeds = [b"poll_v2",poll_id.as_bytes(),canditate_name.as_bytes()] , bump)]
     pub candidate: Account<'info, Candidate>,
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -94,7 +93,7 @@ pub struct InitializeVote<'info> {
     #[account(
         mut,
         seeds = [b"poll_v2",poll_id.as_bytes(),candidate_name.as_bytes()],
-        bump
+        bump = candidate.bump
     )]
     pub candidate: Account<'info, Candidate>,
 
@@ -102,7 +101,6 @@ pub struct InitializeVote<'info> {
     pub signer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
-
 
 #[account]
 #[derive(InitSpace)]
@@ -125,6 +123,7 @@ pub struct Candidate {
     #[max_len(32)]
     pub name: String,
     pub candidate_votes: u64,
+    pub bump:u8
 }
 
 #[account]
