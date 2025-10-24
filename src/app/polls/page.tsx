@@ -10,17 +10,6 @@ import React from 'react'
 function Polls() {
   const {data: Polls, isPending, error} = getAllPolls()
   
-  // if (error) {
-  //   return (
-  //     <div className="max-w-4xl flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
-  //       <div className="bg-red-500/20 border border-red-500 rounded-lg p-8 max-w-md">
-  //         <h2 className="text-red-400 text-xl font-bold mb-2">Error</h2>
-  //         <p className="text-red-200">{error.message}</p>
-  //       </div>
-  //     </div>
-  //   )
-  // }
-  
   return (
     <div className=' w-full h-screen overflow-y-scroll multi-layer-bg p-4'>
       <div className='relative flex flex-col  gap-10 px-5'>

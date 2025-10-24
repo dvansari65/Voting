@@ -48,7 +48,7 @@ export default function Home() {
     mutate(payload, {
       onSuccess: (data) => {
         console.log('data from poll account', data)
-        queryClient.invalidateQueries({ queryKey: ['polls'] })
+        queryClient.invalidateQueries({ queryKey: ['AllPolls'] })
         toast.success('Poll created successfully!')
         setDescription('')
         setStartDate(0)

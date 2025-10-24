@@ -189,6 +189,9 @@ export type Votee = {
                   118,
                   111,
                   116,
+                  101,
+                  95,
+                  109,
                   101
                 ]
               },
@@ -199,6 +202,10 @@ export type Votee = {
               {
                 "kind": "arg",
                 "path": "candidateName"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
               }
             ]
           }
