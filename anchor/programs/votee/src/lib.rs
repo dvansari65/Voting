@@ -83,7 +83,7 @@ pub struct InitializeCanditate<'info> {
 #[derive(Accounts)]
 #[instruction(candidate_name:String,poll_id:String)]
 pub struct InitializeVote<'info> {
-    #[account(init, space = 8 + Vote :: INIT_SPACE ,payer = signer, seeds = [b"vote",poll_id.as_bytes(),candidate_name.as_bytes()],bump)]
+    #[account(init, space = 8 + Vote :: INIT_SPACE ,payer = signer, seeds = ["vote_me".as_bytes(),poll_id.as_bytes(),candidate_name.as_bytes(),signer.key().as_ref()],bump)]
     pub vote: Account<'info, Vote>,
     #[account(
         seeds = [b"poll_v2",poll_id.as_bytes()],
