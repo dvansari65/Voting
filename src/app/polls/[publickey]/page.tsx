@@ -12,9 +12,9 @@ import { useSinglePoll } from '@/hooks/useSinglePoll'
 import { useVoteProgram } from '@/hooks/useVoteProgram'
 import { candidateInfo } from '@/types/candidate'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { PublicKey } from '@solana/web3.js'
+import { PublicKey, SystemProgram } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
-import { Calendar, FileText, Hash, Users } from 'lucide-react'
+import { Calendar, FileText, Hash, Users, Wallet } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -25,6 +25,7 @@ function Page() {
   const [candidateName, setCandidateName] = useState('')
   const [initializeCandidateModal, setInitializeCandidateModal] = useState(false)
   const [candidatesInfoModal, setCandidatesInfoModal] = useState(false)
+  const [regAsCandidateError,setRegAsCandidateError] = useState("")
   const [voteModal, setVoteModal] = useState<boolean>(false)
   const [candidateData, setCandidateData] = useState<candidateInfo | undefined>(undefined)
   const [selectedCandidateName, setSelectedCandidateName] = useState<string>('')
@@ -36,9 +37,6 @@ function Page() {
   const convertedPublicKey = new PublicKey(publickey)
   const { data, isPending: isLoading, error: pollError } = useSinglePoll(convertedPublicKey)
 
-  useEffect(() => {
-    console.log('single poll', data)
-  }, [data])
   const pollStatus = data ? getPollStatus(data) : null
   const timeInfo = data ? getTimeInfo(data) : null
 
@@ -63,10 +61,6 @@ function Page() {
       toast.error('Connect your wallet first!')
       return
     }
-    const [votePda] = PublicKey.findProgramAddressSync(
-      [Buffer.from('vote'), Buffer.from(pollId), Buffer.from(candidateName)],
-      PROGRAM_ID,
-    )
     const [candidatePda] = PublicKey.findProgramAddressSync(
       [Buffer.from('poll_v2'), Buffer.from(pollId), Buffer.from(candidateName)],
       program.programId,
@@ -77,10 +71,8 @@ function Page() {
       pollId: data?.pollId.toString(),
       program,
       pollPda,
-      votePda,
       candidatePda
     }
-
     mutate(payload, {
       onSuccess: (data) => {
         setInitializeCandidateModal(false)
@@ -101,8 +93,6 @@ function Page() {
         program.programId,
       )
       const info = await program.provider.connection.getAccountInfo(candidatePda)
-      console.log('Account info:', info)
-      console.log('candidate pda', candidatePda)
       if (!candidatePda) {
         toast.error('Candidate pda not obtained!')
         return
@@ -112,7 +102,6 @@ function Page() {
         console.warn('Discriminator mismatch — this account is not Candidate type')
         return null
       }
-      console.log('candidate data', candidateAccountData)
       setCandidateData(candidateAccountData)
       setSelectedCandidateName(candidateName)
       setVoteModal(true)
@@ -134,22 +123,26 @@ function Page() {
 
     try {
       const pollId = data.pollId.toString()
-      console.log('porgram id', program.programId.toString())
       // Derive PDAs
       const [votePda] = PublicKey.findProgramAddressSync(
-        [Buffer.from('vote'), Buffer.from(pollId), Buffer.from(candidateName)],
+        [Buffer.from('vote_me'), Buffer.from(pollId), Buffer.from(selectedCandidateName),walletPublicKey.toBuffer()],
         PROGRAM_ID,
       )
       const [candidatePda] = PublicKey.findProgramAddressSync(
-        [Buffer.from('poll_v2'), Buffer.from(pollId), Buffer.from(candidateName)],
-        program.programId,
+        [Buffer.from('poll_v2'), Buffer.from(pollId), Buffer.from(selectedCandidateName)],
+        PROGRAM_ID,
       )
+
       const [pollPda] = PublicKey.findProgramAddressSync([Buffer.from('poll_v2'), Buffer.from(pollId)], PROGRAM_ID)
       // Check if user already voted for this candidate
       const existingVote = await program.provider.connection.getAccountInfo(votePda)
       if (existingVote) {
         toast.error('You have already voted for this candidate!')
         return
+      }
+      if(walletPublicKey.toString().trim() !== program?.provider?.publicKey?.toString().trim()){
+        toast.error("Keys mismatched occured!")
+        return;
       }
       // Call the vote instruction
       const tx = await program.methods
@@ -159,6 +152,7 @@ function Page() {
           poll: pollPda,
           candidate: candidatePda,
           signer: walletPublicKey,
+          systemProgram:SystemProgram.programId
         })
         .rpc()
       console.log('Vote transaction:', tx)
