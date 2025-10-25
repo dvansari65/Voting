@@ -61,6 +61,10 @@ function Page() {
       toast.error('Connect your wallet first!')
       return
     }
+    if(data.canditatesAmounts === 10){
+      toast.error("Candidates limit reached to its maximum limit!")
+      return;
+    }
     const [candidatePda] = PublicKey.findProgramAddressSync(
       [Buffer.from('poll_v2'), Buffer.from(pollId), Buffer.from(candidateName)],
       program.programId,
